@@ -10,4 +10,4 @@ INSERT INTO <table_name_in_plural>
 
 # Utility Commands
 \! cls
-mysqldump -u root -p --database_name library_db < G:\dev\it30B\backups\date_db_name.sql
+mysqldump -u root -p --database_name library_db > G:\dev\it30B\backups\date_db_name.sql
