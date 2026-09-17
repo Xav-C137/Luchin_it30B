@@ -19,10 +19,19 @@ try {
     echo "Database connection successful!";
 } catch (PDOException $e) {
     die("Database connection failed: " . $e->getMessage());  
-}
+};
+
+// Session
+session_start();
+    
+// Determine Current Section
+$section = $_GET['section'] ?? 'students';
+
+// Determin CRUD Operation
+$action = $_GET['action'] ?? '';
+
 
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -31,6 +40,21 @@ try {
     <title>Library System</title>
 </head>
 <body>
-    <p>Welcome to the Library System!  </p>
+    <h1>Welcome to the Library System!  </h1>
+    <nav>
+        <a href="index.php?section=students">Students</a> |
+        <a href="index.php?section=books">Books</a> |
+        <a href="index.php?section=borrow">Borrow</a>
+    </nav>
+    <hr>
+    <?php if ($section === 'students'): ?>
+        <h1>Students</h1>
+    <?php endif; ?>
+    <?php if ($section === 'books'): ?>
+        <h1>Books</h1>
+    <?php endif; ?>
+    <?php if ($section === 'borrow'): ?>
+        <h1>Borrow</h1>
+    <?php endif; ?>
 </body>
 </html>
