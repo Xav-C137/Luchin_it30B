@@ -1,4 +1,4 @@
-<?php
+    <?php
 // Database Connection 
 $host = 'localhost';
 $db = 'it30_lab_db';
@@ -42,6 +42,12 @@ if($section === 'students' && $action === 'create') {
         $firstName = trim($_POST['student_first_name'] ?? '');
         $lastName = trim($_POST['student_last_name'] ?? '');
         $course = trim($_POST['student_course'] ?? '');
+
+        if($firstName !== '' && lastName !== '' && $course !== '') {
+            $sql = "
+                  INSERT INTO students (student_firstn
+            ";
+        }
     }
 }
 
