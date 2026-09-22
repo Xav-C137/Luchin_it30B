@@ -19,7 +19,7 @@ try {
     echo "Database connection successful!";
 } catch (PDOException $e) {
     die("Database connection failed: " . $e->getMessage());  
-};
+}
 
 // Session
 session_start();
@@ -30,8 +30,23 @@ $section = $_GET['section'] ?? 'students';
 // Determin CRUD Operation
 $action = $_GET['action'] ?? '';
 
+// Fetch Students
+if($section === 'students') {
+    $stmt = $pdo->query("SELECT * FROM students");
+    $students = $stmt->fetchAll();
+}
+
+// Create Student
+if($section === 'students' && $action === 'create') {
+    if($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $firstName = trim($_POST['student_first_name'] ?? '');
+        $lastName = trim($_POST['student_last_name'] ?? '');
+        $course = trim($_POST['student_course'] ?? '');
+    }
+}
 
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -40,21 +55,109 @@ $action = $_GET['action'] ?? '';
     <title>Library System</title>
 </head>
 <body>
-    <h1>Welcome to the Library System!  </h1>
+    <h1>Welcome to the Library System!</h1>
     <nav>
         <a href="index.php?section=students">Students</a> |
         <a href="index.php?section=books">Books</a> |
         <a href="index.php?section=borrow">Borrow</a>
     </nav>
     <hr>
+
     <?php if ($section === 'students'): ?>
         <h1>Students</h1>
-    <?php endif; ?>
-    <?php if ($section === 'books'): ?>
-        <h1>Books</h1>
-    <?php endif; ?>
-    <?php if ($section === 'borrow'): ?>
-        <h1>Borrow</h1>
-    <?php endif; ?>
+        <p>
+            <a href="index.php?section=students&action=create">
+                Add Student
+            </a>
+        </p>
+        <?php if ($action==='create'): ?>
+            <h2>Create Student</h2>
+
+            <form method="POST">
+                <p>
+                    <label>First Name:</label>
+                    <input type="text" 
+                           name="student_first_name" 
+                           required
+                           />
+                </p>
+
+                <p>
+                    <label>Last Name:</label>
+                    <input type="text" 
+                           name="student_last_name" 
+                           required
+                           />
+                </p>
+
+                <p>
+                    <label>Course:</label>
+                    <input type="text" 
+                           name="student_course" 
+                           required
+                           />   
+                </p>
+
+                <button type="submit">
+                    Save
+                </button>
+
+                <a href="index.php?section=students">
+                    Cancel 
+                </a>  
+            </form>
+
+            <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Course</th>
+                    <th>Created at</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($students as $student): ?>
+                    <tr>
+                        <td>
+                            <?=htmlspecialchars($student['student_id'])?>
+                        </td>
+                        <td>
+                            <?=htmlspecialchars($student['student_first_name'])?>
+                        </td>
+                        <td>
+                            <?=htmlspecialchars($student['student_last_name'])?>
+                        </td>
+                        <td>
+                            <?=htmlspecialchars($student['student_course'])?>
+                        </td>
+                        <td>
+                            <?=htmlspecialchars($student['student_created_at'])?>
+                        </td>
+                        <td>
+                            <a href="index.php?section=students&action=edit&id=<?=htmlspecialchars($student['student_id'])?>">Edit</a>
+                            <a href="index.php?section=students&action=delete&id=<?=htmlspecialchars($student['student_id'])?>">Delete</a>
+                        </td>
+                        </td>
+                        <!-- <td>
+                            <a href="index.php?section=students&action=edit&id=<?php echo $student['student_id']; ?>">Edit</a> |
+                            <a href="index.php?section=students&action=delete&id=<?php echo $student['student_id']; ?>">Delete</a>
+                        </td> -->
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+        <?php else: ?>
+            <p>No students found.</p>
+        <?php endif; ?>
+        
+        <?php elseif ($section === 'books'): ?>
+            <h1>Books</h1>
+
+        <?php elseif ($section === 'borrow'): ?>
+            <h1>Borrow</h1>
+        <?php endif; ?>
 </body>
 </html>
