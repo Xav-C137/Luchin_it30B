@@ -63,10 +63,9 @@ if($section==='students' && $action==='create'){
             $stmt=$pdo->prepare($sql);
 
             $stmt->execute([
-                $student_first_name,
-                $student_last_name,
-                $course,
-                $studentId
+                $firstName,
+                $lastName,
+                $course
             ]); 
 
             header("Location: index.php?section=students");
@@ -78,21 +77,41 @@ if($section==='students' && $action==='create'){
 // Update Student
 if($section==='students' && $action==='update'){
     
-$studentId = (int) ($_GET['id']) ?? 00;
+    $studentId = (int) ($_GET['id']) ?? 00;
     
+    $firstName = trim($_POST['student_first_name'] ?? '');
+    $lastName = trim($_POST['student_last_name'] ?? '');
+    $course = trim($_POST['student_course'] ?? '');
+
+    // Retrieve student info by default
+    $stmt = $pdo->prepare("
+        SELECT *
+        FROM students
+        WHERE student_id = ?
+    ");
+    
+    $stmt->execute([$studentId]);
+
+    $student = $stmt->fetch();
+
+    if(!$student){
+        die("Student Not Found");
+
+    }
+
     if($_SERVER['REQUEST_METHOD'] ==='POST'){ 
 
         $sql=("
-        UPDATE STUDENTS
+        UPDATE students
             SET
             student_first_name = ?,
             student_last_name = ?,
             student_course = ?
-        WHERE student_id =?
-    
-            ");
+            WHERE student_id =?
+        ");
 
             $stmt = $pdo->prepare($sql);
+
             $stmt->execute([
                 $firstName,
                 $lastName,
@@ -104,23 +123,6 @@ $studentId = (int) ($_GET['id']) ?? 00;
             exit;
     }
 
-    // Retrieve student info by default
-
-    $stmt = $pdo->prepare("
-    SELECT *
-    FROM students
-    WHERE student_id = ?
-    ");
-    
-    $stmt->execute([$studentId]);
-
-
-    $student = $stmt->fetch();
-
-    if(!$student){
-        die("Student Not Found");
-
-    }
 }
 
 // Fetch books
@@ -145,7 +147,7 @@ if($section==='books' && $action==='create'){
 
         if($bookTitle !== '' && $bookAuthor !== '' && $bookCategory !== ''){
             $sql = "
-                INSERT INTO books(
+                INSERT INTO book(
                     book_title,
                     book_author,
                     book_category
@@ -247,7 +249,7 @@ if($section==='books' && $action==='update'){
             
 
             <form method="POST">
-       
+
                 <p>
                 <label>First Name:</label>
                 <br>
@@ -281,12 +283,12 @@ if($section==='books' && $action==='update'){
                     Cancel
                 </a>
             </form>
-           
+        
         <?php elseif($action==='update'): ?>
             <h2>Update Student Info</h2>
             
             <form method="POST">
-       
+
                 <p>
                 <label>First Name:</label>
                 <br>
@@ -416,25 +418,25 @@ if($section==='books' && $action==='update'){
                     <label>Title:</label>
                     <br>
                     <input type="text"
-                           name="book_title"
-                           value="<?=htmlspecialchars($book['book_title']) ?>"
-                           required />
+                            name="book_title"
+                            value="<?=htmlspecialchars($book['book_title']) ?>"
+                            required />
                 </p>
                 <p>
                     <label>Author:</label>
                     <br>
                     <input type="text"
-                           name="book_author"
-                           value="<?=htmlspecialchars($book['book_author']) ?>"
-                           required />
+                            name="book_author"
+                            value="<?=htmlspecialchars($book['book_author']) ?>"
+                            required />
                 </p>
                 <p>
                     <label>Category:</label>
                     <br>
                     <input type="text"
-                           name="book_category"
-                           value="<?=htmlspecialchars($book['book_category']) ?>"
-                           required />
+                            name="book_category"
+                            value="<?=htmlspecialchars($book['book_category']) ?>"
+                            required />
                 </p>
 
                 <button type="submit">Save</button>

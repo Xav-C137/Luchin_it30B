@@ -106,22 +106,22 @@ if($section === 'students' && $action === 'update') {
         SET
             student_first_name = ?,
             student_last_name = ?,
-            student_course = ?
+            student_course = ? 
+            WHERE student_id = ?
+            ");
 
-    ");
+        $stmt = $pdo->prepare($sql);
 
-    $stmt = $pdo->prepare($sql);
+        $stmt->execute([
+            $firstName,
+            $lastName,
+            $course,
+            $studentId
+        ]);
 
-    $stmt->execute([
-        $firstName,
-        $lastName,
-        $course,
-        $studentId
-    ]);
-
-    header("Location: index.php?section=students");
-    exit;
-    }
+        header("Location: index.php?section=students");
+        exit;
+        }
 }
 
 // Delete Student
