@@ -1,6 +1,6 @@
 -- #1 students table
 
-CREATE TABLE IF NOT EXIST students (
+CREATE TABLE IF NOT EXISTS students (
     -- Primary key for the students table
     student_id INT AUTO_INCREMENT PRIMARY KEY,
 

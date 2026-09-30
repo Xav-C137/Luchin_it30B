@@ -1,128 +1,172 @@
-<?php
-
-// Database connection
+    <!-- <?php
+// Database Connection 
 $host = 'localhost';
-$db = 'it30b_lab_db';
+$db = 'it30_lab_db';
 $user = 'root';
 $pass = '';
 $charset = 'utf8mb4';
 
-$dsn = "mysql:host=$host; dbname=$db; charset=$charset";
+$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
 
 $options = [
-    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    PDO::ATTR_EMULATE_PREPARES => false,
+    PDO:: ATTR_ERRMODE => PDO:: ERRMODE_EXCEPTION,
+    PDO:: ATTR_DEFAULT_FETCH_MODE => PDO:: FETCH_ASSOC,
+    PDO:: ATTR_EMULATE_PREPARES => false
 ];
 
-try{
+try {
     $pdo = new PDO($dsn, $user, $pass, $options);
-} catch(PDOEXCEPTION $e){
-    die("Database connection failed" . $e->getMessage());
+    echo "Database connection successful!";
+} catch (PDOException $e) {
+    die("Database connection failed: " . $e->getMessage());  
 }
 
 // Session
 session_start();
-
-// Determine current section
+    
+// Determine Current Section
 $section = $_GET['section'] ?? 'students';
 
-// Determine CRUD operation
+// Determin CRUD Operation
 $action = $_GET['action'] ?? '';
 
-// Fetch students
-if($section === 'students'){
-    $stmt = $pdo->query("   
-        SELECT *
-        FROM students
-        ORDER BY student_id DESC
-    ");
-
+// Fetch Students
+if($section === 'students') {
+    $stmt = $pdo->query("SELECT * FROM students");
     $students = $stmt->fetchAll();
 }
 
 // Create Student
-if($section==='students' && $action==='create'){
-
-    if($_SERVER['REQUEST_METHOD']==='POST'){
-
+if($section === 'students' && $action === 'create') {
+    if($_SERVER['REQUEST_METHOD'] === 'POST') {
         $firstName = trim($_POST['student_first_name'] ?? '');
         $lastName = trim($_POST['student_last_name'] ?? '');
         $course = trim($_POST['student_course'] ?? '');
 
-        if($firstName !== '' && $lastName !== '' && $course !== ''){
+        if($firstName !== '' && $lastName !== '' && $course !== '') {
             $sql = "
-                INSERT INTO students(
-                    student_first_name,
-                    student_last_name,
-                    student_course
-                )
-                VALUES(?,?,?)
+                INSERT INTO students (
+                  student_first_name,
+                  student_last_name,
+                  student_course
+                  ) 
+                  VALUES (?,?,?)
             ";
 
             $stmt=$pdo->prepare($sql);
 
             $stmt->execute([
-                $student_first_name,
-                $student_last_name,
-                $course,
-                $studentId
+                $firstName,
+                $lastName,
+                $course
             ]); 
 
             header("Location: index.php?section=students");
             exit;
+
         }
     }
 }
 
 // Update Student
-if($section==='students' && $action==='update'){
+if($section === 'students' && $action === 'update') {
+    $studentId = (int) ($_GET['id']) ?? 00;
     
-$studentId = (int) ($_GET['id']) ?? 00;
-    
-    if($_SERVER['REQUEST_METHOD'] ==='POST'){
-   
-      $sql=("
-      UPDATE STUDENTS
-      SET
-          student_first_name = ?,
-          student_last_name = ?,
-          student_course = ?
-        WHERE student_id =?
-          
-          ");
+    $firstName = trim($_POST['student_first_name'] ?? '');
+    $lastName = trim($_POST['student_last_name'] ?? '');
+    $course = trim($_POST['student_course'] ?? '');
 
-          $stmt = $pdo->prepare($sql);
-
-          $stmt = execute([
-            $firstName,
-            $lastName,
-            $course,
-            $studentId
-          ]);
-
-          header("Location: index.php?section=students");
-          exit;
-    }
-
-    // Retrieve student info by default
-
+    // Retrive student info by default
     $stmt = $pdo->prepare("
-    SELECT *
-    FROM students
-    WHERE student_id = ?
+        SELECT *
+        FROM students
+        WHERE student_id = ?
     ");
-    
-    $stmt->execute([$studentId]);
 
+    $stmt->execute([$studentId]);
 
     $student = $stmt->fetch();
 
-    if(!$student){
-        die("Student Not Found");
+    if(!$student) {
+        die("Student Not Found.");
+    }
 
+    // Update student on post
+    if($_SERVER['REQUEST_METHOD'] === 'POST' ) {
+
+    $sql=("
+        UPDATE STUDENTS
+        SET
+            student_first_name = ?,
+            student_last_name = ?,
+            student_course = ?
+
+    ");
+
+    $stmt = $pdo->prepare($sql);
+
+    $stmt->execute([
+        $firstName,
+        $lastName,
+        $course,
+        $studentId
+    ]);
+
+    header("Location: index.php?section=students");
+    exit;
     }
 }
+
+// Delete Student
+if($section === 'students' && $action === 'delete') {
+    $studentId = (int) ($_GET['id']) ?? 00;
+    
+    $firstName = trim($_POST['student_first_name'] ?? '');
+    $lastName = trim($_POST['student_last_name'] ?? '');
+    $course = trim($_POST['student_course'] ?? '');
+
+    // Retrive student info by default
+    $stmt = $pdo->prepare("
+        SELECT *
+        FROM students
+        WHERE student_id = ?
+    ");
+
+    $stmt->execute([$studentId]);
+
+    $student = $stmt->fetch();
+
+    if(!$student) {
+        die("Student Not Found.");
+    }
+
+    // Update student on post
+    if($_SERVER['REQUEST_METHOD'] === 'POST' ) {
+
+    $sql=("
+        UPDATE STUDENTS
+        SET
+            student_first_name = ?,
+            student_last_name = ?,
+            student_course = ?
+
+    ");
+
+    $stmt = $pdo->prepare($sql);
+
+    $stmt->execute([
+        $firstName,
+        $lastName,
+        $course,
+        $studentId
+    ]);
+
+    header("Location: index.php?section=students");
+    exit;
+    }
+}
+
+
 
 ?>
 
@@ -155,7 +199,6 @@ $studentId = (int) ($_GET['id']) ?? 00;
             
 
             <form method="POST">
-       
                 <p>
                 <label>First Name:</label>
                 <br>
@@ -189,18 +232,14 @@ $studentId = (int) ($_GET['id']) ?? 00;
                     Cancel
                 </a>
             </form>
-           
         <?php elseif($action==='update'): ?>
             <h2>Update Student Info</h2>
-            
             <form method="POST">
-       
                 <p>
                 <label>First Name:</label>
                 <br>
                 <input  type="text"
                         name="student_first_name"
-                        value="<?=htmlspecialchars($student['student_first_name']) ?>"
                         required
                 />
                 </p>
@@ -209,7 +248,6 @@ $studentId = (int) ($_GET['id']) ?? 00;
                 <br>
                 <input  type="text"
                         name="student_last_name"
-                        value="<?=htmlspecialchars($student['student_last_name']) ?>"
                         required
                 />
                 </p>
@@ -218,7 +256,6 @@ $studentId = (int) ($_GET['id']) ?? 00;
                 <br>
                 <input  type="text"
                         name="student_course"
-                        value="<?=htmlspecialchars($student['student_course']) ?>"
                         required
                 />
                 </p>
@@ -231,6 +268,7 @@ $studentId = (int) ($_GET['id']) ?? 00;
                     Cancel
                 </a>
             </form>
+            <?=htmlspecialchars($student['student_first_name']) ?>
 
 
         <?php else: ?>
@@ -291,4 +329,4 @@ $studentId = (int) ($_GET['id']) ?? 00;
         <h1>Borrow</h1>
     <?php endif; ?>
 </body>
-</html>
+</html> -->
