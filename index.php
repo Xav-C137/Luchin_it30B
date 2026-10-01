@@ -241,6 +241,8 @@ if($section === 'borrow'){
         FROM book
         ORDER BY book_title
         ");
+
+        $books = $stmt->fetchAll();
 }
 
 // Create Borrow
