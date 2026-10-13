@@ -220,8 +220,9 @@ if($section==='books' && $action==='update'){
 
 // Retrieve borowed books
 if($section === 'borrow'){
-    // Retrive Students
-    $stmt = $pdo->prepare("
+
+    // Fetch Students for borrow form
+    $stmt = $pdo->query("
         SELECT 
             student_id,
             student_first_name,
@@ -230,19 +231,40 @@ if($section === 'borrow'){
         ORDER BY student_last_name, student_first_name
         ");
 
-    $borrows = $stmt->fetchAll();
+        $students = $stmt->fetchAll();
 
-    // Retrive Books
-    $stmt = $pdo->prepare("
+    // Retrive Books from borrow form
+    $stmt = $pdo->query("
         SELECT 
             book_id,
             book_title,
-            book_author,
+            book_author
         FROM book
         ORDER BY book_title
         ");
 
         $books = $stmt->fetchAll();
+
+    // Fetch Borrowed Books from form
+    // $stmt = $pdo->query("
+    //     SELECT 
+    //         b.borrow_id,
+    //         s.student_first_name,
+    //         s.student_last_name,
+    //         bk.book_title,
+    //         b.borrow_date,
+    //         b.return_date,
+    //         CASE
+    //             WHEN b.return_date IS NULL THEN 'Not Returned'
+    //             ELSE 'Returned'
+    //         END AS status
+    //     FROM borrow b
+    //     JOIN students s ON b.student_id = s.student_id
+    //     JOIN book bk ON b.book_id = bk.book_id
+    //     ORDER BY b.borrow_id DESC
+    //     ");
+        
+    //     $borrows = $stmt->fetchAll();
 }
 
 // Create Borrow
@@ -438,28 +460,12 @@ if($section==='borrow' && $action==='create'){
             </thead>
             <tbody>
                 <?php foreach($students as $student): ?>
-
                     <tr>
-                        <td>
-                            <?=htmlspecialchars($student['student_id']) ?>
-                        </td>
-
-                        <td>
-                            <?=htmlspecialchars($student['student_first_name']) ?>
-                        </td>
-
-                        <td>
-                            <?=htmlspecialchars($student['student_last_name']) ?>
-                        </td>
-
-                        <td>
-                            <?=htmlspecialchars($student['student_course']) ?>
-                        </td>
-
-                        <td>
-                            <?=htmlspecialchars($student['student_created_at']) ?>
-                        </td>
-                        
+                        <td><?=htmlspecialchars($student['student_id']) ?></td>
+                        <td><?=htmlspecialchars($student['student_first_name']) ?></td>
+                        <td><?=htmlspecialchars($student['student_last_name']) ?></td>
+                        <td><?=htmlspecialchars($student['student_course']) ?></td>
+                        <td><?=htmlspecialchars($student['student_created_at']) ?></td>
                         <td>
                             <a href="index.php?section=students&action=update&id=<?=$student['student_id']?> ">
                                 Edit
@@ -587,9 +593,83 @@ if($section==='borrow' && $action==='create'){
             <h2>Borrow a Book</h2>
 
             <form method="POST">
+                <label>Student</label>
+                <br>
+                <select name=student_id required>
+                    <option value="">
+                        -- Select Student --    
+                    </option>
+                    <?php foreach($students as $student): ?>
+                        <option value="<?=$student['student_id'] ?>">
+                            <?=htmlspecialchars($student['student_first_name'] . ' ' . $student['student_last_name']) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+
+                <br><br>
+
+                <label>Book</label>
+                <br>
+                <select name=book_id required>
+                    <option value="">
+                        -- Select Book --    
+                    </option>
+                    <?php foreach($books as $book): ?>
+                        <option value="<?=$book['book_id'] ?>">
+                            <?=htmlspecialchars($book['book_title']) . ' ' . $book['book_author'] ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+
+                <br>
+
+                <button type="submit">
+                    Borrow
+                </button>
+
+                <a href="index.php?section=borrow">
+                    Cancel
+                </a>
+
             </form>
 
+            <?php else: ?>
+            <!-- <table border="1">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Student</th>
+                        <th>Book</th>
+                        <th>Borrow Date</th>
+                        <th>Return Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach($borrows as $borrow): ?>
+                        <tr>
+                            <td><?=htmlspecialchars($borrow['borrow_id']) ?></td>
+                            <td><?=htmlspecialchars($borrow['student_first_name'] . ' ' . $borrow['student_last_name']) ?></td>
+                            <td><?=htmlspecialchars($borrow['book_title']) ?></td>
+                            <td><?=htmlspecialchars($borrow['borrow_date']) ?></td>
+                            <td><?=htmlspecialchars($borrow['return_date'] ?? 'Not returned') ?></td>
+                            <td><?=htmlspecialchars($borrow['status']) ?></td>
+                            <td>
+                                <a href="index.php?section=borrow&action=update&id=<?=$borrow['borrow_id']?>">
+                                    Edit
+                                </a>
+                                |
+                                <a href="#">Delete</a>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+
+            </table> -->
             <?php endif; ?>
+
+            
 
     <?php endif; ?>
 
