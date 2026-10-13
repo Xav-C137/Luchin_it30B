@@ -267,13 +267,13 @@ if($section === 'borrow'){
     //     $borrows = $stmt->fetchAll();
 }
 
-// Create Borrow
+// Borrow a Book
 if($section==='borrow' && $action==='create'){
 
     if($_SERVER['REQUEST_METHOD']==='POST'){
 
-        $studentId = (int)$_POST['student_id'] ?? 00;
-        $bookId = (int)$_POST['book_id'] ?? 00;
+        $studentId = (int)$_POST['student_id'] ?? 0;
+        $bookId = (int)$_POST['book_id'] ?? 0;
         
         if($studentId >0 && $bookId >0) {
 
@@ -335,6 +335,26 @@ if($section==='borrow' && $action==='create'){
                 exit;
             }
         }
+}
+
+// Return a Book
+if($section === 'borrow' && $action === 'return') {
+
+    $borrowId = (int) ($_GET['id'] ?? 0);
+
+    $stmt = $pdo->prepare("
+        UPDATE borrow
+        SET borrow_return_date = CURRENT_TIMESTAMP()
+        WHERE borrow_id = ?
+        ");
+
+    $stmt->execute([$borrowId]);
+
+    $_SESSION['alert'] = "Book returned successfully.";
+
+    header("Location: index.php?section=borrow");
+    exit;
+    
 }
 
 ?>
@@ -634,7 +654,7 @@ if($section==='borrow' && $action==='create'){
             </form>
 
             <?php else: ?>
-            <!-- <table border="1">
+            <table border="1">
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -666,7 +686,7 @@ if($section==='borrow' && $action==='create'){
                     <?php endforeach; ?>
                 </tbody>
 
-            </table> -->
+            </table>
             <?php endif; ?>
 
             
