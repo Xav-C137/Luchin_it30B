@@ -33,13 +33,8 @@ $ACTION = $_GET['action'] ?? '';
 /* STUDENTS SECTION NGA LOGIC*/
 
 //Fetch students
-if($section === 'students'){
-    $stmt = $pdo->query("   
-        SELECT *
-        FROM students
-        ORDER BY student_id DESC
-    ");
-
+if ($SECTION === 'students') {
+    $stmt = $pdo->query("SELECT * FROM students ORDER BY students_id DESC");
     $students = $stmt->fetchAll();
 }
 

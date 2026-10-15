@@ -129,7 +129,7 @@ if($section==='students' && $action==='update'){
 if($section === 'books'){
     $stmt = $pdo->query("
         SELECT *
-        FROM book
+        FROM books
         ORDER BY book_id DESC
     ");
 
@@ -147,7 +147,7 @@ if($section==='books' && $action==='create'){
 
         if($bookTitle !== '' && $bookAuthor !== '' && $bookCategory !== ''){
             $sql = "
-                INSERT INTO book(
+                INSERT INTO books(
                     book_title,
                     book_author,
                     book_category
@@ -181,7 +181,7 @@ if($section==='books' && $action==='update'){
         $bookCategory = trim($_POST['book_category'] ?? '');
 
         $sql = "
-            UPDATE book
+            UPDATE books
             SET
                 book_title = ?,
                 book_author = ?,
@@ -205,7 +205,7 @@ if($section==='books' && $action==='update'){
     // Retrieve book info by default
     $stmt = $pdo->prepare("
         SELECT *
-        FROM book
+        FROM books
         WHERE book_id = ?
     ");
 
@@ -239,16 +239,49 @@ if($section === 'borrow'){
             book_id,
             book_title,
             book_author
-        FROM book
+        FROM books
         ORDER BY book_title
         ");
 
         $books = $stmt->fetchAll();
 
+        
+        // Fetch Borrowed Books from form
+    $stmt = $pdo->query("
+        SELECT
+            br.borrow_id,
+            s.student_first_name,
+            s.student_last_name,
+            b.book_title,
+            br.borrow_date,
+            br.borrow_return_date,
+        CASE
+            WHEN br.borrow_return_date IS NULL THEN 'Not Returned'
+            ELSE 'Returned'
+            END AS status
+        FROM borrow br
+        INNER JOIN students s ON br.student_id = s.student_id
+        INNER JOIN books b ON br.book_id = b.book_id
+        ORDER BY br.borrow_id DESC
+    ");
+
+    $borrows = $stmt->fetchAll();
+
     // Fetch Borrowed Books from form
     // $stmt = $pdo->query("
     //     SELECT 
-    //         b.borrow_id,
+    //         s.student_first_name,
+    //         s.student_last_name,
+    //         b.book_title,
+    //         b.borrow_id,ned'
+    //         END AS status
+    //     FROM borrow b
+    //     JOIN students s ON b.student_id = s.student_id
+    //     JOIN books bk ON b.book_id = bk.book_id
+    //     ORDER BY b.borrow_id DESC
+    //     ");
+        
+    //     $borrows = $stmt->fetchAll();
     //         s.student_first_name,
     //         s.student_last_name,
     //         bk.book_title,
@@ -256,67 +289,78 @@ if($section === 'borrow'){
     //         b.return_date,
     //         CASE
     //             WHEN b.return_date IS NULL THEN 'Not Returned'
-    //             ELSE 'Returned'
-    //         END AS status
-    //     FROM borrow b
-    //     JOIN students s ON b.student_id = s.student_id
-    //     JOIN book bk ON b.book_id = bk.book_id
-    //     ORDER BY b.borrow_id DESC
-    //     ");
-        
-    //     $borrows = $stmt->fetchAll();
+    //             ELSE 'Retur
 }
 
 // Borrow a Book
-if($section==='borrow' && $action==='create'){
+if($section==='borrow' && $action==='create' && $_SERVER['REQUEST_METHOD']==='POST') {
 
-    if($_SERVER['REQUEST_METHOD']==='POST'){
-
-        $studentId = (int)$_POST['student_id'] ?? 0;
-        $bookId = (int)$_POST['book_id'] ?? 0;
+        $studentId = (int) ($_POST['student_id'] ?? 0);
+        $bookId = (int)($_POST['book_id'] ?? 0);
         
         if($studentId >0 && $bookId >0) {
 
             // Check if student has an unreturned book
             $stmt = $pdo->prepare("
-                SELECT borrow_id
-                FROM borrow
-                WHERE student_id = ? 
-                    AND return_date IS NULL
-                LIMIT 1
+            SELECT borrow_id FROM borrow
+            WHERE student_id = ? 
+                AND borrow_return_date IS NULL
+            LIMIT 1
             ");
 
             $stmt->execute([$studentId]);
 
             $studentBorrow = $stmt->fetch();
 
-            if($studentBorrow) {
-                $_SESSION['alert'] = "This student cannot borrow another book because a previous book has not been returned ";
-                header("Location: index.php?section=borrow&action=create");
-                exit;
+            if($stmt->fetch()){
+            $_SESSION['alert'] = "This student cannot borrow another book because a previous book has not been returned.";
             } else {
+
+            // if($studentBorrow) {
+            //     $_SESSION['alert'] = "This student cannot borrow another book because a previous book has not been returned ";
+            //     header("Location: index.php?section=borrow&action=create");
+            //     exit;
+            // } else {
                     // Check if book already borrowed
                     $stmt = $pdo->prepare("
                         SELECT borrow_id
                         FROM borrow
                         WHERE book_id = ? 
-                            AND return_date IS NULL
+                            AND borrow_return_date IS NULL
                         LIMIT 1
                     ");
 
-                    $stmt->execute([$borrowId]);
+                    $stmt->execute([$bookId]);
 
-                    $bookBorrow = $stmt->fetch();
+                    // $bookBorrow = $stmt->fetch();
 
-                    if ($bookBorrow) {
-                        $_SESSION['alert'] = "This book cannot be borrowed because it has not been returned.";
+                    if($stmt->fetch()){
+                    $_SESSION['alert'] = "This book cannot be borrowed because it has not been returned.";
                     } else {
+                        try {
+                    $stmt = $pdo->prepare("
+                        INSERT INTO borrow (student_id, book_id)
+                        VALUES (?, ?)
+                    ");
+                    $stmt->execute([$studentId, $bookId]);
+                    $_SESSION['alert'] = "Book borrowed successfully.";
+                } catch(PDOException $e){
+                    // 23000 = constraint violation (see section 3)
+                    if($e->getCode() === '23000'){
+                        $_SESSION['alert'] = "Borrow failed: student or book is no longer available.";
+                    } else {
+                        throw $e;
+
+
+                }
+            }
+        }
 
                         // Create borrow record
                         $stmt = $pdo->prepare("
                             INSERT INTO borrow (
                                 student_id,
-                                book_id,
+                                book_id
                             )
                             VALUES (?,?)
                         ");
@@ -334,8 +378,8 @@ if($section==='borrow' && $action==='create'){
                 header("Location: index.php?section=borrow&action=create");
                 exit;
             }
-        }
-}
+    
+
 
 // Return a Book
 if($section === 'borrow' && $action === 'return') {
@@ -673,7 +717,7 @@ if($section === 'borrow' && $action === 'return') {
                             <td><?=htmlspecialchars($borrow['student_first_name'] . ' ' . $borrow['student_last_name']) ?></td>
                             <td><?=htmlspecialchars($borrow['book_title']) ?></td>
                             <td><?=htmlspecialchars($borrow['borrow_date']) ?></td>
-                            <td><?=htmlspecialchars($borrow['return_date'] ?? 'Not returned') ?></td>
+                            <td><?=htmlspecialchars($borrow['borrow_return_date'] ?? 'Not returned') ?></td>
                             <td><?=htmlspecialchars($borrow['status']) ?></td>
                             <td>
                                 <a href="index.php?section=borrow&action=update&id=<?=$borrow['borrow_id']?>">
