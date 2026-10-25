@@ -312,72 +312,47 @@ if($section==='borrow' && $action==='create' && $_SERVER['REQUEST_METHOD']==='PO
 
             $studentBorrow = $stmt->fetch();
 
-            if($stmt->fetch()){
+            if($studentBorrow){
             $_SESSION['alert'] = "This student cannot borrow another book because a previous book has not been returned.";
             } else {
 
-            // if($studentBorrow) {
-            //     $_SESSION['alert'] = "This student cannot borrow another book because a previous book has not been returned ";
-            //     header("Location: index.php?section=borrow&action=create");
-            //     exit;
-            // } else {
-                    // Check if book already borrowed
-                    $stmt = $pdo->prepare("
-                        SELECT borrow_id
-                        FROM borrow
-                        WHERE book_id = ? 
-                            AND borrow_return_date IS NULL
-                        LIMIT 1
-                    ");
+                // Check if the book is already borrowed.
+                $stmt = $pdo->prepare("
+                    SELECT borrow_id
+                    FROM borrow
+                    WHERE book_id = ?
+                        AND borrow_return_date IS NULL
+                    LIMIT 1
+                ");
 
-                    $stmt->execute([$bookId]);
+                $stmt->execute([$bookId]);
+                $bookBorrow = $stmt->fetch();
 
-                    // $bookBorrow = $stmt->fetch();
-
-                    if($stmt->fetch()){
+                if($bookBorrow){
                     $_SESSION['alert'] = "This book cannot be borrowed because it has not been returned.";
-                    } else {
-                        try {
-                    $stmt = $pdo->prepare("
-                        INSERT INTO borrow (student_id, book_id)
-                        VALUES (?, ?)
-                    ");
-                    $stmt->execute([$studentId, $bookId]);
-                    $_SESSION['alert'] = "Book borrowed successfully.";
-                } catch(PDOException $e){
-                    // 23000 = constraint violation (see section 3)
-                    if($e->getCode() === '23000'){
-                        $_SESSION['alert'] = "Borrow failed: student or book is no longer available.";
-                    } else {
-                        throw $e;
-
-
+                } else {
+                    try {
+                        $stmt = $pdo->prepare("
+                            INSERT INTO borrow (student_id, book_id)
+                            VALUES (?, ?)
+                        ");
+                        $stmt->execute([$studentId, $bookId]);
+                        $_SESSION['alert'] = "Book borrowed successfully.";
+                    } catch(PDOException $e){
+                        // 23000 = constraint violation.
+                        if($e->getCode() === '23000'){
+                            $_SESSION['alert'] = "Borrow failed: student or book is no longer available.";
+                        } else {
+                            throw $e;
+                        }
+                    }
                 }
             }
         }
 
-                        // Create borrow record
-                        $stmt = $pdo->prepare("
-                            INSERT INTO borrow (
-                                student_id,
-                                book_id
-                            )
-                            VALUES (?,?)
-                        ");
-
-                        $stmt->execute([
-                            $studentId,
-                            $bookId
-                        ]);
-
-                        $_SESSION['alert'] = "Book borrowed successfully.";
-
-                    }
-                }
-                
                 header("Location: index.php?section=borrow&action=create");
                 exit;
-            }
+}
     
 
 
