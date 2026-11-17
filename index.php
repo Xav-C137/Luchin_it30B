@@ -654,11 +654,13 @@ if($section === 'borrow' && $action === 'return') {
                             <td><?=htmlspecialchars($borrow['borrow_return_date'] ?? 'Not returned') ?></td>
                             <td><?=htmlspecialchars($borrow['status']) ?></td>
                             <td>
-                                <a href="index.php?section=borrow&action=update&id=<?=$borrow['borrow_id']?>">
-                                    Edit
-                                </a>
-                                |
-                                <a href="#">Delete</a>
+                                <?php if($borrow['borrow_return_date'] === null): ?>
+                                    <a href="index.php?section=borrow&action=return&id=<?=$borrow['borrow_id']?>">
+                                        Return
+                                    </a>
+                                <?php else: ?>
+                                    &mdash;
+                                <?php endif; ?>
                             </td>
                         </tr>
                     <?php endforeach; ?>
