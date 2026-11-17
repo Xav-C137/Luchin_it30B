@@ -26,10 +26,10 @@ while ($row = $catStmt->fetch()) {
     $categoryCounts[] = (int) $row['cnt'];
 }
 
-?>
+// ---------- 3. BORROW STATUS (Returned vs Not Returned) ----------
+$returnedBorrows = (int) $totalBorrows - (int) $activeBorrows;
 
-<!-- Material Icon -->
-<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+?>
 
 <style>
     .app-header{
@@ -48,7 +48,7 @@ while ($row = $catStmt->fetch()) {
         display:flex;
         align-items:center;
         gap: 0.5rem;
-        color:#212121
+        color:#212121;
         margin:0;
     }
 
@@ -78,7 +78,7 @@ while ($row = $catStmt->fetch()) {
         gap:0.35rem;
     }
 
-    .nav-links a .material-icon{
+    .nav-links a .material-icons{
         font-size:1.2rem;
     }
 
@@ -125,7 +125,7 @@ while ($row = $catStmt->fetch()) {
     </h1>
 
     <nav class="nav-links">
-        <a href="index.php?section=dashboard" class="<?= navActive('dashboard', $currentSection) ?>">
+        <a href="dashboard.php" class="<?= navActive('dashboard', $currentSection) ?>">
             <span class="material-icons">dashboard</span>
             Dashboard
         </a>
@@ -147,8 +147,9 @@ while ($row = $catStmt->fetch()) {
     </nav>
 
 </header>
-<body>
-    <div class="stats-grid">
+
+<!-- KPI STATS -->
+<div class="stats-grid">
     <div class="stat-card">
         <div class="stat-header">
             <span class="stat-label">Students</span>
@@ -185,4 +186,154 @@ while ($row = $catStmt->fetch()) {
         <div class="stat-sub">not returned</div>
     </div>
 </div>
-</body>
+
+<!-- CHARTS -->
+<div class="charts-grid">
+
+    <!-- Pie Chart - Book Categories-->
+    <div class="chart-card">
+        <div class="chart-title">
+            Books by category
+            <span>
+                <span class="material-icons">category</span>
+                collection
+            </span>
+        </div>
+        <canvas id="categoryChart"></canvas>
+    </div>
+
+    <!-- Doughnut Chart - Borrow Status -->
+    <div class="chart-card">
+        <div class="chart-title">
+            Borrow status
+            <span>
+                <span class="material-icons">swap_horiz</span>
+                circulation
+            </span>
+        </div>
+        <canvas id="borrowChart"></canvas>
+    </div>
+
+</div>
+
+<!-- CHART SCRIPTS (must run after the canvases above exist) -->
+<script>
+(function() {
+    // Materialize standard palette
+    const palette = [
+        '#1976d2', // blue
+        '#4caf50', // green
+        '#ff9800', // orange
+        '#f44336', // red
+        '#9c27b0', // purple
+        '#00bcd4', // cyan
+        '#795548', // brown
+        '#607d8b'  // blue grey
+    ];
+
+    // ---------- DOUGHNUT : BOOKS BY CATEGORY ----------
+    const catCtx = document.getElementById('categoryChart');
+    if (catCtx) {
+        new Chart(catCtx, {
+            type: 'doughnut',
+            data: {
+                labels: <?= json_encode($categories) ?>,
+                datasets: [{
+                    data: <?= json_encode($categoryCounts) ?>,
+                    backgroundColor: <?= json_encode($categories) ?>.map((_, i) => palette[i % palette.length]),
+                    borderWidth: 2,
+                    borderColor: '#ffffff',
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                cutout: '65%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            boxWidth: 12,
+                            boxHeight: 12,
+                            usePointStyle: false, // Materialize usually uses squares
+                            padding: 16,
+                            font: { size: 12, family: 'Roboto' },
+                            color: '#616161'
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: '#212121',
+                        titleColor: '#ffffff',
+                        bodyColor: '#ffffff',
+                        padding: 10,
+                        cornerRadius: 4,
+                        displayColors: true,
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const pct = total > 0 ? ((value / total) * 100).toFixed(0) : 0;
+                                return ` ${label}: ${value} (${pct}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // ---------- DOUGHNUT : BORROW STATUS ----------
+    const borrowCtx = document.getElementById('borrowChart');
+    if (borrowCtx) {
+        new Chart(borrowCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Returned', 'Not returned'],
+                datasets: [{
+                    data: [<?= (int) $returnedBorrows ?>, <?= (int) $activeBorrows ?>],
+                    backgroundColor: [palette[1], palette[2]], // green, orange
+                    borderWidth: 2,
+                    borderColor: '#ffffff',
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                cutout: '65%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            boxWidth: 12,
+                            boxHeight: 12,
+                            padding: 16,
+                            font: { size: 12, family: 'Roboto' },
+                            color: '#616161'
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: '#212121',
+                        titleColor: '#ffffff',
+                        bodyColor: '#ffffff',
+                        padding: 10,
+                        cornerRadius: 4,
+                        displayColors: true,
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const pct = total > 0 ? ((value / total) * 100).toFixed(0) : 0;
+                                return ` ${label}: ${value} (${pct}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+})();
+</script>
