@@ -1,24 +1,6 @@
-<?php 
+<?php
 
-$host = 'localhost';
-$db   = 'it30_lab_db';
-$user = 'root';
-$pass = '';
-$charset = 'utf8mb4';
-
-$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
-
-$options = [
-    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    PDO::ATTR_EMULATE_PREPARES   => false,
-];
-
-try {
-    $pdo = new PDO($dsn, $user, $pass, $options);
-} catch (PDOException $e) {
-    die("Database connection failed: " . $e->getMessage());
-}
+require_once __DIR__ . '/includes/db.php';
 
 ?>
 
@@ -30,6 +12,8 @@ try {
     <title>Library · Dashboard</title>
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
@@ -140,11 +124,11 @@ try {
         .chart-title span .material-icons {
             font-size: 1rem;
         }
-        canvas { 
+        .chart-card canvas { 
             display: block; 
-            width: 100% !important; 
-            height: auto !important; 
-            max-height: 200px; 
+            max-height: 200px;
+            max-width: 100%;
+            margin: 0 auto;
         }
 
         /* ---- RECENT BORROWS ---- */
@@ -264,8 +248,9 @@ try {
 </head>
 <body>
 
-    <?php include 'includes/navbar.php' ?>
-    <h1>Welcome, Manager</h1>
-    <img src="img/Me.png" alt="Description of the image" style="max-width: 250px; height: 200px;">
+    <div class="dashboard">
+        <?php include 'includes/navbar.php' ?>
+        <h1>Welcome, Manager</h1>
+    </div>
 </body>
 </html>
