@@ -1,4 +1,4 @@
--s- student SQL#1 : select all students
+-- student SQL#1 : select all students
 SELECT * FROM students;
 
 -- students SQL#2 : select student in asc order by id
@@ -25,7 +25,7 @@ SELECT * FROM students ORDER BY student_first_name DESC;
 
 SELECT student_first_name, 
        student_last_name 
-       FROM students;
+       FROM students
        ORDER BY student_first_name ASC;
 
 -- student SQL#9 : LIMIT 1

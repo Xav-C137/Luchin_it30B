@@ -267,29 +267,6 @@ if($section === 'borrow'){
 
     $borrows = $stmt->fetchAll();
 
-    // Fetch Borrowed Books from form
-    // $stmt = $pdo->query("
-    //     SELECT 
-    //         s.student_first_name,
-    //         s.student_last_name,
-    //         b.book_title,
-    //         b.borrow_id,ned'
-    //         END AS status
-    //     FROM borrow b
-    //     JOIN students s ON b.student_id = s.student_id
-    //     JOIN books bk ON b.book_id = bk.book_id
-    //     ORDER BY b.borrow_id DESC
-    //     ");
-        
-    //     $borrows = $stmt->fetchAll();
-    //         s.student_first_name,
-    //         s.student_last_name,
-    //         bk.book_title,
-    //         b.borrow_date,
-    //         b.return_date,
-    //         CASE
-    //             WHEN b.return_date IS NULL THEN 'Not Returned'
-    //             ELSE 'Retur
 }
 
 // Borrow a Book
