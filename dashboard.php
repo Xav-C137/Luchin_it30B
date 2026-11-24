@@ -2,6 +2,30 @@
 
 require_once __DIR__ . '/includes/db.php';
 
+
+// ---------- 1. KPI COUNTS ----------
+$studentCount  = $pdo->query("SELECT COUNT(*) FROM students")->fetchColumn();
+$bookCount     = $pdo->query("SELECT COUNT(*) FROM books")->fetchColumn();
+$totalBorrows  = $pdo->query("SELECT COUNT(*) FROM borrow")->fetchColumn();
+$activeBorrows = $pdo->query("SELECT COUNT(*) FROM borrow WHERE borrow_return_date IS NULL")->fetchColumn();
+
+// ---------- 2. BOOKS BY CATEGORY ----------
+$catStmt = $pdo->query("
+    SELECT book_category, COUNT(*) AS cnt
+    FROM books
+    GROUP BY book_category
+    ORDER BY cnt DESC
+");
+$categories = [];
+$categoryCounts = [];
+while ($row = $catStmt->fetch()) {
+    $categories[]     = $row['book_category'];
+    $categoryCounts[] = (int) $row['cnt'];
+}
+
+// ---------- 3. BORROW STATUS (Returned vs Not Returned) ----------
+$returnedBorrows = (int) $totalBorrows - (int) $activeBorrows;
+
 ?>
 
 <!DOCTYPE html>
@@ -14,6 +38,8 @@ require_once __DIR__ . '/includes/db.php';
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <!-- Material Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
@@ -247,7 +273,6 @@ require_once __DIR__ . '/includes/db.php';
     </style>
 </head>
 <body>
-
     <div class="dashboard">
         <?php include 'includes/navbar.php' ?>
         <h1>Welcome, Manager</h1>
