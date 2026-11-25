@@ -92,7 +92,6 @@ function navActive($section, $currentSection){
             white-space:nowrap;
         }
     }
-
 </style>
 
 <header class="app-header">
@@ -122,5 +121,4 @@ function navActive($section, $currentSection){
             Borrow
         </a>
     </nav>
-
 </header>
