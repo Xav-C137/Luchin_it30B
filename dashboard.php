@@ -337,7 +337,8 @@ $recentBorrows = $recentStmt->fetchAll();
 <body>
     <div class="dashboard">
         <?php include 'includes/navbar.php' ?>
-        <h1>Welcome, Manager</h1>
+        <h2>Welcome, Manager</h2>
+        <br>
 
         <!-- KPI STATS -->
         <div class="stats-grid">
@@ -447,6 +448,7 @@ $recentBorrows = $recentStmt->fetchAll();
             <?php endforeach; ?>
         <?php endif; ?>
     </div>
+</div>
 
 <script>
     (function () {
