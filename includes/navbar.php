@@ -1,6 +1,7 @@
 <?php
 
-$currentSection = $_GET['section'] ?? 'dashboard';
+// A page may set $currentSection before including this file (index.php does).
+$currentSection = $currentSection ?? ($_GET['section'] ?? 'dashboard');
 
 function navActive($section, $currentSection){
     return $section === $currentSection ? 'active' : '';

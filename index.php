@@ -342,345 +342,396 @@ if($section === 'borrow' && $action === 'return') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Library System</title>
+    <!-- Material Icons (used by the shared navbar) -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Shared theme -->
+    <link rel="stylesheet" href="assets/app.css">
 </head>
 <body>
-    <h1>Simple Library System</h1>
-    <nav>
-        <a href="index.php?section=students">Students</a>
-        <a href="index.php?section=books">Books</a>
-        <a href="index.php?section=borrow">Borrow</a>
-    </nav>
-    <hr>
-    <?php if($section === 'students'):?>
-        <h1>Students</h1>
+    <div class="page">
+        <?php
+            // Reuse the same header/nav as the dashboard.
+            $currentSection = $section;
+            include __DIR__ . '/includes/navbar.php';
+        ?>
 
-        <p>
-            <a href="index.php?section=students&action=create">
-                Add student
-            </a>
-        </p>
+        <?php if(isset($_SESSION['alert'])): ?>
+            <div class="flash">
+                <span class="material-icons">info</span>
+                <?= htmlspecialchars($_SESSION['alert']) ?>
+            </div>
+            <?php unset($_SESSION['alert']); ?>
+        <?php endif; ?>
+    <?php if($section === 'students'):?>
+        <div class="section-head">
+            <h2 class="page-title">
+                <span class="material-icons">people</span>
+                Students
+            </h2>
+
+            <?php if($action !== 'create' && $action !== 'update'): ?>
+                <a class="btn btn-primary" href="index.php?section=students&action=create">
+                    <span class="material-icons">add</span>
+                    Add student
+                </a>
+            <?php endif; ?>
+        </div>
 
         <?php if($action==='create'): ?>
-            <h2>Create Student</h2>
-            
+            <div class="card form-card">
+                <h3>Create Student</h3>
 
-            <form method="POST">
+                <form method="POST">
+                    <div class="field">
+                        <label for="student_first_name">First Name</label>
+                        <input  type="text"
+                                id="student_first_name"
+                                name="student_first_name"
+                                required>
+                    </div>
 
-                <p>
-                <label>First Name:</label>
-                <br>
-                <input  type="text"
-                        name="student_first_name"
-                        required
-                />
-                </p>
-                <p>
-                <label>Last Name:</label>
-                <br>
-                <input  type="text"
-                        name="student_last_name"
-                        required
-                />
-                </p>
-                <p>
-                <label>Course:</label>
-                <br>
-                <input  type="text"
-                        name="student_course"
-                        required
-                />
-                </p>
+                    <div class="field">
+                        <label for="student_last_name">Last Name</label>
+                        <input  type="text"
+                                id="student_last_name"
+                                name="student_last_name"
+                                required>
+                    </div>
 
-                <button type="submit">
-                    Save
-                </button>
+                    <div class="field">
+                        <label for="student_course">Course</label>
+                        <input  type="text"
+                                id="student_course"
+                                name="student_course"
+                                required>
+                    </div>
 
-                <a href="index.php?section=students">
-                    Cancel
-                </a>
-            </form>
-        
+                    <div class="form-actions">
+                        <button class="btn btn-primary" type="submit">Save</button>
+                        <a class="btn btn-ghost" href="index.php?section=students">Cancel</a>
+                    </div>
+                </form>
+            </div>
+
         <?php elseif($action==='update'): ?>
-            <h2>Update Student Info</h2>
-            
-            <form method="POST">
+            <div class="card form-card">
+                <h3>Update Student Info</h3>
 
-                <p>
-                <label>First Name:</label>
-                <br>
-                <input  type="text"
-                        name="student_first_name"
-                        value="<?=htmlspecialchars($student['student_first_name']) ?>"
-                        required
-                />
-                </p>
-                <p>
-                <label>Last Name:</label>
-                <br>
-                <input  type="text"
-                        name="student_last_name"
-                        value="<?=htmlspecialchars($student['student_last_name']) ?>"
-                        required
-                />
-                </p>
-                <p>
-                <label>Course:</label>
-                <br>
-                <input  type="text"
-                        name="student_course"
-                        value="<?=htmlspecialchars($student['student_course']) ?>"
-                        required
-                />
-                </p>
+                <form method="POST">
+                    <div class="field">
+                        <label for="student_first_name">First Name</label>
+                        <input  type="text"
+                                id="student_first_name"
+                                name="student_first_name"
+                                value="<?=htmlspecialchars($student['student_first_name']) ?>"
+                                required>
+                    </div>
 
-                <button type="submit">
-                    Save
-                </button>
+                    <div class="field">
+                        <label for="student_last_name">Last Name</label>
+                        <input  type="text"
+                                id="student_last_name"
+                                name="student_last_name"
+                                value="<?=htmlspecialchars($student['student_last_name']) ?>"
+                                required>
+                    </div>
 
-                <a href="index.php?section=students">
-                    Cancel
-                </a>
-            </form>
+                    <div class="field">
+                        <label for="student_course">Course</label>
+                        <input  type="text"
+                                id="student_course"
+                                name="student_course"
+                                value="<?=htmlspecialchars($student['student_course']) ?>"
+                                required>
+                    </div>
 
+                    <div class="form-actions">
+                        <button class="btn btn-primary" type="submit">Save</button>
+                        <a class="btn btn-ghost" href="index.php?section=students">Cancel</a>
+                    </div>
+                </form>
+            </div>
 
         <?php else: ?>
-        <table border="1">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>First Name</th>
-                    <th>Last Name</th>
-                    <th>Course</th>
-                    <th>Create at</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach($students as $student): ?>
-                    <tr>
-                        <td><?=htmlspecialchars($student['student_id']) ?></td>
-                        <td><?=htmlspecialchars($student['student_first_name']) ?></td>
-                        <td><?=htmlspecialchars($student['student_last_name']) ?></td>
-                        <td><?=htmlspecialchars($student['student_course']) ?></td>
-                        <td><?=htmlspecialchars($student['student_created_at']) ?></td>
-                        <td>
-                            <a href="index.php?section=students&action=update&id=<?=$student['student_id']?> ">
-                                Edit
-                            </a>
-                                |
-                                <a href="#">Delete</a>
-                        </td>
-                    </tr>
-                    <?php endforeach?>
-            </tbody>
-        </table>
+            <div class="card table-card">
+                <div class="table-scroll">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                <th>Course</th>
+                                <th>Created at</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if(empty($students)): ?>
+                                <tr>
+                                    <td colspan="6" class="empty-state">No students yet.</td>
+                                </tr>
+                            <?php else: ?>
+                                <?php foreach($students as $student): ?>
+                                    <tr>
+                                        <td class="col-id"><?=htmlspecialchars($student['student_id']) ?></td>
+                                        <td><?=htmlspecialchars($student['student_first_name']) ?></td>
+                                        <td><?=htmlspecialchars($student['student_last_name']) ?></td>
+                                        <td><?=htmlspecialchars($student['student_course']) ?></td>
+                                        <td><?=htmlspecialchars($student['student_created_at']) ?></td>
+                                        <td>
+                                            <div class="actions">
+                                                <a class="btn btn-sm btn-ghost"
+                                                   href="index.php?section=students&action=update&id=<?=$student['student_id']?>">
+                                                    Edit
+                                                </a>
+                                                <a class="btn btn-sm btn-danger-ghost" href="#">Delete</a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         <?php endif;?>
     <?php endif; ?>
 
     <?php if($section === 'books'):?>
-        <h1>Books</h1>
+        <div class="section-head">
+            <h2 class="page-title">
+                <span class="material-icons">menu_book</span>
+                Books
+            </h2>
 
-        <p>
-            <a href="index.php?section=books&action=create">
-                Add book
-            </a>
-        </p>
+            <?php if($action !== 'create' && $action !== 'update'): ?>
+                <a class="btn btn-primary" href="index.php?section=books&action=create">
+                    <span class="material-icons">add</span>
+                    Add book
+                </a>
+            <?php endif; ?>
+        </div>
 
         <?php if($action==='create'): ?>
-            <h2>Create Book</h2>
+            <div class="card form-card">
+                <h3>Create Book</h3>
 
-            <form method="POST">
-                <p>
-                    <label>Title:</label>
-                    <br>
-                    <input type="text" name="book_title" required />
-                </p>
-                <p>
-                    <label>Author:</label>
-                    <br>
-                    <input type="text" name="book_author" required />
-                </p>
-                <p>
-                    <label>Category:</label>
-                    <br>
-                    <input type="text" name="book_category" required />
-                </p>
+                <form method="POST">
+                    <div class="field">
+                        <label for="book_title">Title</label>
+                        <input type="text" id="book_title" name="book_title" required>
+                    </div>
 
-                <button type="submit">Save</button>
-                <a href="index.php?section=books">Cancel</a>
-            </form>
+                    <div class="field">
+                        <label for="book_author">Author</label>
+                        <input type="text" id="book_author" name="book_author" required>
+                    </div>
+
+                    <div class="field">
+                        <label for="book_category">Category</label>
+                        <input type="text" id="book_category" name="book_category" required>
+                    </div>
+
+                    <div class="form-actions">
+                        <button class="btn btn-primary" type="submit">Save</button>
+                        <a class="btn btn-ghost" href="index.php?section=books">Cancel</a>
+                    </div>
+                </form>
+            </div>
 
         <?php elseif($action==='update'): ?>
-            <h2>Update Book Info</h2>
+            <div class="card form-card">
+                <h3>Update Book Info</h3>
 
-            <form method="POST">
-                <p>
-                    <label>Title:</label>
-                    <br>
-                    <input type="text"
-                            name="book_title"
-                            value="<?=htmlspecialchars($book['book_title']) ?>"
-                            required />
-                </p>
-                <p>
-                    <label>Author:</label>
-                    <br>
-                    <input type="text"
-                            name="book_author"
-                            value="<?=htmlspecialchars($book['book_author']) ?>"
-                            required />
-                </p>
-                <p>
-                    <label>Category:</label>
-                    <br>
-                    <input type="text"
-                            name="book_category"
-                            value="<?=htmlspecialchars($book['book_category']) ?>"
-                            required />
-                </p>
+                <form method="POST">
+                    <div class="field">
+                        <label for="book_title">Title</label>
+                        <input type="text"
+                               id="book_title"
+                               name="book_title"
+                               value="<?=htmlspecialchars($book['book_title']) ?>"
+                               required>
+                    </div>
 
-                <button type="submit">Save</button>
-                <a href="index.php?section=books">Cancel</a>
-            </form>
+                    <div class="field">
+                        <label for="book_author">Author</label>
+                        <input type="text"
+                               id="book_author"
+                               name="book_author"
+                               value="<?=htmlspecialchars($book['book_author']) ?>"
+                               required>
+                    </div>
+
+                    <div class="field">
+                        <label for="book_category">Category</label>
+                        <input type="text"
+                               id="book_category"
+                               name="book_category"
+                               value="<?=htmlspecialchars($book['book_category']) ?>"
+                               required>
+                    </div>
+
+                    <div class="form-actions">
+                        <button class="btn btn-primary" type="submit">Save</button>
+                        <a class="btn btn-ghost" href="index.php?section=books">Cancel</a>
+                    </div>
+                </form>
+            </div>
 
         <?php else: ?>
-            <table border="1">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Title</th>
-                        <th>Author</th>
-                        <th>Category</th>
-                        <th>Created at</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach($books as $book): ?>
-                        <tr>
-                            <td><?=htmlspecialchars($book['book_id']) ?></td>
-                            <td><?=htmlspecialchars($book['book_title']) ?></td>
-                            <td><?=htmlspecialchars($book['book_author']) ?></td>
-                            <td><?=htmlspecialchars($book['book_category']) ?></td>
-                            <td><?=htmlspecialchars($book['book_created_at']) ?></td>
-                            <td>
-                                <a href="index.php?section=books&action=update&id=<?=$book['book_id']?>">
-                                    Edit
-                                </a>
-                                |
-                                <a href="#">Delete</a>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+            <div class="card table-card">
+                <div class="table-scroll">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Title</th>
+                                <th>Author</th>
+                                <th>Category</th>
+                                <th>Created at</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if(empty($books)): ?>
+                                <tr>
+                                    <td colspan="6" class="empty-state">No books yet.</td>
+                                </tr>
+                            <?php else: ?>
+                                <?php foreach($books as $book): ?>
+                                    <tr>
+                                        <td class="col-id"><?=htmlspecialchars($book['book_id']) ?></td>
+                                        <td><?=htmlspecialchars($book['book_title']) ?></td>
+                                        <td><?=htmlspecialchars($book['book_author']) ?></td>
+                                        <td><?=htmlspecialchars($book['book_category']) ?></td>
+                                        <td><?=htmlspecialchars($book['book_created_at']) ?></td>
+                                        <td>
+                                            <div class="actions">
+                                                <a class="btn btn-sm btn-ghost"
+                                                   href="index.php?section=books&action=update&id=<?=$book['book_id']?>">
+                                                    Edit
+                                                </a>
+                                                <a class="btn btn-sm btn-danger-ghost" href="#">Delete</a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         <?php endif; ?>
     <?php endif; ?>
 
     <?php if($section === 'borrow'):?>
-        <h1>Borrow</h1>
+        <div class="section-head">
+            <h2 class="page-title">
+                <span class="material-icons">swap_horiz</span>
+                Borrow
+            </h2>
 
-        <p>
-            <a href="index.php?section=borrow&action=create">
-                Borrow a book
-            </a>
-        </p>
+            <?php if($action !== 'create'): ?>
+                <a class="btn btn-primary" href="index.php?section=borrow&action=create">
+                    <span class="material-icons">add</span>
+                    Borrow a book
+                </a>
+            <?php endif; ?>
+        </div>
 
         <?php if ($action==='create'): ?>
-            <h2>Borrow a Book</h2>
+            <div class="card form-card">
+                <h3>Borrow a Book</h3>
 
-            <form method="POST">
-                <label>Student</label>
-                <br>
-                <select name=student_id required>
-                    <option value="">
-                        -- Select Student --    
-                    </option>
-                    <?php foreach($students as $student): ?>
-                        <option value="<?=$student['student_id'] ?>">
-                            <?=htmlspecialchars($student['student_first_name'] . ' ' . $student['student_last_name']) ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
+                <form method="POST">
+                    <div class="field">
+                        <label for="student_id">Student</label>
+                        <select id="student_id" name="student_id" required>
+                            <option value="">-- Select Student --</option>
+                            <?php foreach($students as $student): ?>
+                                <option value="<?=(int) $student['student_id'] ?>">
+                                    <?=htmlspecialchars($student['student_first_name'] . ' ' . $student['student_last_name']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
 
-                <br><br>
+                    <div class="field">
+                        <label for="book_id">Book</label>
+                        <select id="book_id" name="book_id" required>
+                            <option value="">-- Select Book --</option>
+                            <?php foreach($books as $book): ?>
+                                <option value="<?=(int) $book['book_id'] ?>">
+                                    <?=htmlspecialchars($book['book_title'] . ' - ' . $book['book_author']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
 
-                <label>Book</label>
-                <br>
-                <select name=book_id required>
-                    <option value="">
-                        -- Select Book --    
-                    </option>
-                    <?php foreach($books as $book): ?>
-                        <option value="<?=$book['book_id'] ?>">
-                            <?=htmlspecialchars($book['book_title']) . ' ' . $book['book_author'] ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
+                    <div class="form-actions">
+                        <button class="btn btn-primary" type="submit">Borrow</button>
+                        <a class="btn btn-ghost" href="index.php?section=borrow">Cancel</a>
+                    </div>
+                </form>
+            </div>
 
-                <br>
-
-                <button type="submit">
-                    Borrow
-                </button>
-
-                <a href="index.php?section=borrow">
-                    Cancel
-                </a>
-
-            </form>
-
-            <?php else: ?>
-            <table border="1">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Student</th>
-                        <th>Book</th>
-                        <th>Borrow Date</th>
-                        <th>Return Date</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach($borrows as $borrow): ?>
-                        <tr>
-                            <td><?=htmlspecialchars($borrow['borrow_id']) ?></td>
-                            <td><?=htmlspecialchars($borrow['student_first_name'] . ' ' . $borrow['student_last_name']) ?></td>
-                            <td><?=htmlspecialchars($borrow['book_title']) ?></td>
-                            <td><?=htmlspecialchars($borrow['borrow_date']) ?></td>
-                            <td><?=htmlspecialchars($borrow['borrow_return_date'] ?? 'Not returned') ?></td>
-                            <td><?=htmlspecialchars($borrow['status']) ?></td>
-                            <td>
-                                <?php if($borrow['borrow_return_date'] === null): ?>
-                                    <a href="index.php?section=borrow&action=return&id=<?=$borrow['borrow_id']?>">
-                                        Return
-                                    </a>
-                                <?php else: ?>
-                                    &mdash;
-                                <?php endif; ?>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-
-            </table>
-            <?php endif; ?>
-
-            
-
+        <?php else: ?>
+            <div class="card table-card">
+                <div class="table-scroll">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Student</th>
+                                <th>Book</th>
+                                <th>Borrow Date</th>
+                                <th>Return Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if(empty($borrows)): ?>
+                                <tr>
+                                    <td colspan="7" class="empty-state">No borrow records yet.</td>
+                                </tr>
+                            <?php else: ?>
+                                <?php foreach($borrows as $borrow): ?>
+                                    <tr>
+                                        <td class="col-id"><?=htmlspecialchars($borrow['borrow_id']) ?></td>
+                                        <td><?=htmlspecialchars($borrow['student_first_name'] . ' ' . $borrow['student_last_name']) ?></td>
+                                        <td><?=htmlspecialchars($borrow['book_title']) ?></td>
+                                        <td><?=htmlspecialchars($borrow['borrow_date']) ?></td>
+                                        <td><?=htmlspecialchars($borrow['borrow_return_date'] ?? '-') ?></td>
+                                        <td>
+                                            <span class="chip <?= $borrow['borrow_return_date'] === null ? 'chip-borrowed' : 'chip-returned' ?>">
+                                                <span class="material-icons">
+                                                    <?= $borrow['borrow_return_date'] === null ? 'schedule' : 'check_circle' ?>
+                                                </span>
+                                                <?=htmlspecialchars($borrow['status']) ?>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <?php if($borrow['borrow_return_date'] === null): ?>
+                                                <a class="btn btn-sm btn-success-ghost"
+                                                   href="index.php?section=borrow&action=return&id=<?=$borrow['borrow_id']?>">
+                                                    Return
+                                                </a>
+                                            <?php else: ?>
+                                                <span class="muted">&mdash;</span>
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        <?php endif; ?>
     <?php endif; ?>
 
+    </div><!-- /.page -->
 </body>
-<?php if(isset($_SESSION['alert'])): ?>
-    
-    <script>
-        alert( <?= json_encode($_SESSION['alert']) ?> );
-    </script>
-    
-    <?php unset($_SESSION['alert']); ?>
-
-<?php endif; ?>
-
 </html>
