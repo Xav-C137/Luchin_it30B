@@ -375,84 +375,78 @@ $recentBorrows = $recentStmt->fetchAll();
             </div>
             <div class="stat-number"><?= $activeBorrows ?></div>
             <div class="stat-sub">not returned</div>
-        </div>
-
+        </div>    
     </div>
 
     <!-- CHARTS -->
-<div class="charts-grid">
+    <div class="charts-grid">
 
-    <!-- Doughnut Chart: Books by Category -->
-    <div class="chart-card">
-        <div class="chart-title">
-            Books by category
-
-            <span>
-                <span class="material-icons">category</span>
-                collection
-            </span>
-        </div>
-
-        <canvas id="categoryChart" width="400" height="200"></canvas>
-    </div>
-
-</div>
-
-
-
-<!-- Bar Chart: Borrow Activity -->
-<div class="chart-card">
-    <div class="chart-title">
-        Borrows · last 7 days
-
-        <span>
-            <span class="material-icons">trending_up</span>
-            activity
-        </span>
-    </div>
-
-    <canvas id="borrowChart" width="400" height="200"></canvas>
-</div>
-
-<!-- RECENT BORROWS -->
-<div class="recent-borrows">
-    <div class="recent-header">
-        <h3>
-            <span class="material-icons">receipt_long</span>
-            Recent borrows
-        </h3>
-        <a href="#">
-            view all
-            <span class="material-icons">arrow_forward</span>
-        </a>
-    </div>
-    <?php if (empty($recentBorrows)): ?>
-        <div class="borrow-row" style="color:#9e9e9e; justify-content:center;">
-            No borrow records yet.
-        </div>
-    <?php else: ?>
-        <?php foreach ($recentBorrows as $row): ?>
-            <div class="borrow-row">
-                <div class="borrow-student">
-                    <span class="material-icons">person</span>
-                    <?= htmlspecialchars($row['student_first_name'] . ' ' . $row['student_last_name']) ?>
-                </div>
-                <div class="borrow-book">
-                    <span class="material-icons">book</span>
-                    <?= htmlspecialchars($row['book_title']) ?>
-                </div>
-                <div class="borrow-status <?= $row['borrow_return_date'] ? 'returned' : 'borrowed' ?>">
-                    <span class="material-icons">
-                        <?= $row['borrow_return_date'] ? 'check_circle' : 'schedule' ?>
-                    </span>
-                    <?= $row['borrow_return_date'] ? 'Returned' : 'Borrowed' ?>
-                </div>
+        <!-- Doughnut Chart: Books by Category -->
+        <div class="chart-card">
+            <div class="chart-title">
+                Books by category
+            
+                <span>
+                    <span class="material-icons">category</span>
+                    collection
+                </span>
             </div>
-        <?php endforeach; ?>
-    <?php endif; ?>
-</div>
 
+            <canvas id="categoryChart" width="400" height="200"></canvas>
+        </div>
 
+        <!-- Bar Chart: Borrow Activity -->
+        <div class="chart-card">
+            <div class="chart-title">
+                Borrows · last 7 days
+
+                <span>
+                    <span class="material-icons">trending_up</span>
+                    activity
+                </span>
+            </div>
+
+            <canvas id="borrowChart" width="400" height="200"></canvas>
+        </div>
+    </div>
+
+    <!-- RECENT BORROWS -->
+    <div class="recent-borrows">
+        <div class="recent-header">
+            <h3>
+                <span class="material-icons">receipt_long</span>
+                Recent borrows
+            </h3>
+            <a href="#">
+                view all
+                <span class="material-icons">arrow_forward</span>
+            </a>
+        </div>
+        <?php if (empty($recentBorrows)): ?>
+            <div class="borrow-row" style="color:#9e9e9e; justify-content:center;">
+                No borrow records yet.
+            </div>
+        <?php else: ?>
+            <?php foreach ($recentBorrows as $row): ?>
+                <div class="borrow-row">
+                    <div class="borrow-student">
+                        <span class="material-icons">person</span>
+                        <?= htmlspecialchars($row['student_first_name'] . ' ' . $row['student_last_name']) ?>
+                    </div>
+                    <div class="borrow-book">
+                        <span class="material-icons">book</span>
+                        <?= htmlspecialchars($row['book_title']) ?>
+                    </div>
+                    <div class="borrow-status <?= $row['borrow_return_date'] ? 'returned' : 'borrowed' ?>">
+                        <span class="material-icons">
+                            <?= $row['borrow_return_date'] ? 'check_circle' : 'schedule' ?>
+                        </span>
+                        <?= $row['borrow_return_date'] ? 'Returned' : 'Borrowed' ?>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        <?php endif; ?>
+    </div>
 
 <script>
     (function () {
@@ -547,82 +541,81 @@ $recentBorrows = $recentStmt->fetchAll();
 
         // ---------- BAR: BORROWS LAST 7 DAYS ----------
 
-const borrowCtx = document
-    .getElementById('borrowChart')
-    .getContext('2d');
+        const borrowCtx = document
+            .getElementById('borrowChart')
+            .getContext('2d');
 
-new Chart(borrowCtx, {
-    type: 'bar',
+        new Chart(borrowCtx, {
+            type: 'bar',
 
-    data: {
-        labels: <?= json_encode($dayLabels) ?>,
+            data: {
+                labels: <?= json_encode($dayLabels) ?>,
 
-        datasets: [{
-            label: 'Borrows',
-            data: <?= json_encode($dailyBorrows) ?>,
-            backgroundColor: colors.blue,
-            borderRadius: 0, // Material flat bars are sharp
+                datasets: [{
+                    label: 'Borrows',
+                    data: <?= json_encode($dailyBorrows) ?>,
+                    backgroundColor: colors.blue,
+                    borderRadius: 0, // Material flat bars are sharp
 
-            barPercentage: 0.6,
-            categoryPercentage: 0.8
-        }]
-    },
-
-    options: {
-        responsive: true,
-        maintainAspectRatio: true,
-
-        plugins: {
-            legend: {
-                display: false
+                    barPercentage: 0.6,
+                    categoryPercentage: 0.8
+                }]
             },
 
-            tooltip: {
-                backgroundColor: '#212121',
-                titleColor: '#ffffff',
-                bodyColor: '#ffffff',
-                padding: 10,
-                cornerRadius: 4,
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
 
-                callbacks: {
-                    label: (ctx) => ` ${ctx.raw} borrows`
-                }
-            }
-        },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
 
-        scales: {
-            y: {
-                beginAtZero: true,
-                grid: {
-                    color: '#eeeeee',
-                    drawBorder: false
+                    tooltip: {
+                        backgroundColor: '#212121',
+                        titleColor: '#ffffff',
+                        bodyColor: '#ffffff',
+                        padding: 10,
+                        cornerRadius: 4,
+
+                        callbacks: {
+                            label: (ctx) => ` ${ctx.raw} borrows`
+                        }
+                    }
                 },
-                ticks: {
-                    stepSize: 1,
-                    color: '#757575',
-                    font: {
-                        size: 11,
-                        family: 'Roboto'
+
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: '#eeeeee',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            stepSize: 1,
+                            color: '#757575',
+                            font: {
+                                size: 11,
+                                family: 'Roboto'
+                            }
+                        }
+                    },
+
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#757575',
+                            font: {
+                                size: 11,
+                                family: 'Roboto'
+                            }
+                        }
                     }
                 }
-            },
-
-            x: {
-                grid: {
-                    display: false
-                },
-                ticks: {
-                    color: '#757575',
-                    font: {
-                        size: 11,
-                        family: 'Roboto'
-                    }
-                }
             }
-        }
-    }
-});
-
+        });
     })();
 </script>
 </body>
