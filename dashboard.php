@@ -44,9 +44,33 @@ while ($row = $catStmt->fetch()) {
     $categoryCounts[] = (int) $row['cnt'];
 }
 
-// ---------- 3. BORROW STATUS (Returned vs Not Returned) ----------
-$returnedBorrows = (int) $totalBorrows - (int) $activeBorrows;
+// ---------- 3. BORROW ACTIVITY LAST 7 DAYS ----------
 
+$dailyStmt = $pdo->query("
+    SELECT DATE(borrow_date) AS day, COUNT(*) AS cnt
+    FROM borrow
+    WHERE borrow_date >= CURDATE() - INTERVAL 6 DAY
+    GROUP BY DATE(borrow_date)
+    ORDER BY day ASC
+");
+
+$borrowByDay = [];
+
+while ($row = $dailyStmt->fetch()) {
+    $borrowByDay[$row['day']] = (int) $row['cnt'];
+}
+
+// Generate labels and counts for the last 7 days
+
+$dayLabels = [];
+$dailyBorrows = [];
+
+for ($i = 6; $i >= 0; $i--) {
+    $date = date('Y-m-d', strtotime("-$i days"));
+
+    $dayLabels[] = date('D', strtotime($date));
+    $dailyBorrows[] = $borrowByDay[$date] ?? 0;
+}
 ?>
 
 <!DOCTYPE html>
@@ -59,8 +83,7 @@ $returnedBorrows = (int) $totalBorrows - (int) $activeBorrows;
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <!-- Material Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-</head>
-<body>
+    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
@@ -293,6 +316,7 @@ $returnedBorrows = (int) $totalBorrows - (int) $activeBorrows;
         }
     </style>
 </head>
+
 <body>
     <div class="dashboard">
         <?php include 'includes/navbar.php' ?>
@@ -356,6 +380,20 @@ $returnedBorrows = (int) $totalBorrows - (int) $activeBorrows;
     </div>
 
     </div>
+
+<!-- Bar Chart: Borrow Activity -->
+<div class="chart-card">
+    <div class="chart-title">
+        Borrows · last 7 days
+
+        <span>
+            <span class="material-icons">trending_up</span>
+            activity
+        </span>
+    </div>
+
+    <canvas id="borrowChart" width="400" height="200"></canvas>
+</div>
 
 
 
@@ -450,6 +488,84 @@ $returnedBorrows = (int) $totalBorrows - (int) $activeBorrows;
             }
         });
     })();
+
+    // ---------- BAR: BORROWS LAST 7 DAYS ----------
+
+const borrowCtx = document
+    .getElementById('borrowChart')
+    .getContext('2d');
+
+new Chart(borrowCtx, {
+    type: 'bar',
+
+    data: {
+        labels: <?= json_encode($dayLabels) ?>,
+
+        datasets: [{
+            label: 'Borrows',
+            data: <?= json_encode($dailyBorrows) ?>,
+            backgroundColor: colors.blue,
+            borderRadius: 0, // Material flat bars are sharp
+
+            barPercentage: 0.6,
+            categoryPercentage: 0.8
+        }]
+    },
+
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+
+        plugins: {
+            legend: {
+                display: false
+            },
+
+            tooltip: {
+                backgroundColor: '#212121',
+                titleColor: '#ffffff',
+                bodyColor: '#ffffff',
+                padding: 10,
+                cornerRadius: 4,
+
+                callbacks: {
+                    label: (ctx) => ` ${ctx.raw} borrows`
+                }
+            }
+        },
+
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: {
+                    color: '#eeeeee',
+                    drawBorder: false
+                },
+                ticks: {
+                    stepSize: 1,
+                    color: '#757575',
+                    font: {
+                        size: 11,
+                        family: 'Roboto'
+                    }
+                }
+            },
+
+            x: {
+                grid: {
+                    display: false
+                },
+                ticks: {
+                    color: '#757575',
+                    font: {
+                        size: 11,
+                        family: 'Roboto'
+                    }
+                }
+            }
+        }
+    }
+});
 </script>
 </body>
 </html>
