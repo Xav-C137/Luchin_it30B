@@ -1,25 +1,6 @@
 <?php
 
-// Database connection
-$host = 'localhost';
-$db = 'it30_lab_db';
-$user = 'root';
-$pass = '';
-$charset = 'utf8mb4';
-
-$dsn = "mysql:host=$host; dbname=$db; charset=$charset";
-
-$options = [
-    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    PDO::ATTR_EMULATE_PREPARES => false,
-];
-
-try{
-    $pdo = new PDO($dsn, $user, $pass, $options);
-} catch(PDOException $e){
-    die("Database connection failed" . $e->getMessage());
-}
+require_once __DIR__ . '/includes/db.php';
 
 // Session
 session_start();
@@ -77,7 +58,7 @@ if($section==='students' && $action==='create'){
 // Update Student
 if($section==='students' && $action==='update'){
     
-    $studentId = (int) ($_GET['id']) ?? 00;
+    $studentId = (int) ($_GET['id'] ?? 0);
     
     $firstName = trim($_POST['student_first_name'] ?? '');
     $lastName = trim($_POST['student_last_name'] ?? '');
@@ -267,29 +248,6 @@ if($section === 'borrow'){
 
     $borrows = $stmt->fetchAll();
 
-    // Fetch Borrowed Books from form
-    // $stmt = $pdo->query("
-    //     SELECT 
-    //         s.student_first_name,
-    //         s.student_last_name,
-    //         b.book_title,
-    //         b.borrow_id,ned'
-    //         END AS status
-    //     FROM borrow b
-    //     JOIN students s ON b.student_id = s.student_id
-    //     JOIN books bk ON b.book_id = bk.book_id
-    //     ORDER BY b.borrow_id DESC
-    //     ");
-        
-    //     $borrows = $stmt->fetchAll();
-    //         s.student_first_name,
-    //         s.student_last_name,
-    //         bk.book_title,
-    //         b.borrow_date,
-    //         b.return_date,
-    //         CASE
-    //             WHEN b.return_date IS NULL THEN 'Not Returned'
-    //             ELSE 'Retur
 }
 
 // Borrow a Book
@@ -695,11 +653,13 @@ if($section === 'borrow' && $action === 'return') {
                             <td><?=htmlspecialchars($borrow['borrow_return_date'] ?? 'Not returned') ?></td>
                             <td><?=htmlspecialchars($borrow['status']) ?></td>
                             <td>
-                                <a href="index.php?section=borrow&action=update&id=<?=$borrow['borrow_id']?>">
-                                    Edit
-                                </a>
-                                |
-                                <a href="#">Delete</a>
+                                <?php if($borrow['borrow_return_date'] === null): ?>
+                                    <a href="index.php?section=borrow&action=return&id=<?=$borrow['borrow_id']?>">
+                                        Return
+                                    </a>
+                                <?php else: ?>
+                                    &mdash;
+                                <?php endif; ?>
                             </td>
                         </tr>
                     <?php endforeach; ?>
